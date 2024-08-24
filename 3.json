@@ -1,0 +1,11 @@
+{
+    "file_name": "Almond.csv",
+    "model_id": 3,
+    "model_type": "RandomForest",
+    "parameters": {
+      "learning_rate": 0.04,
+      "num_epochs": 200
+    },
+    "description": "Configuración para el modelo 3"
+  }
+  

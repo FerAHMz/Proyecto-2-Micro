@@ -1,10 +1,10 @@
 #include <iostream>
 #include <array>
 #include <cstdio>
-#include <omp.h>
 #include <stdexcept>
 #include <vector>
 #include <string>
+#include <omp.h> // Incluye OpenMP para medir el tiempo
 
 std::string executeCommand(const std::string& command) {
     std::array<char, 128> buffer;
@@ -21,22 +21,21 @@ std::string executeCommand(const std::string& command) {
 }
 
 int main() {
-    const int num_threads = 4; // Número de hilos
-    const char* commands[num_threads] = {
+    const int num_commands = 4; // Número de comandos
+    const char* commands[num_commands] = {
         "python C:\\Proyecto-2-Micro\\train_model.py C:\\Proyecto-2-Micro\\0.json",
         "python C:\\Proyecto-2-Micro\\train_model.py C:\\Proyecto-2-Micro\\1.json",
         "python C:\\Proyecto-2-Micro\\train_model.py C:\\Proyecto-2-Micro\\2.json",
         "python C:\\Proyecto-2-Micro\\train_model.py C:\\Proyecto-2-Micro\\3.json"
     };
 
-    std::vector<std::string> outputs(num_threads); // Vector para almacenar salidas
-    std::vector<std::string> errors(num_threads); // Vector para almacenar errores
+    std::vector<std::string> outputs(num_commands); // Vector para almacenar salidas
+    std::vector<std::string> errors(num_commands); // Vector para almacenar errores
 
-    double start_time = omp_get_wtime();
+    double start_time = omp_get_wtime(); // Comienza a medir el tiempo
 
-    // Paralelizar la ejecución de comandos
-    #pragma omp parallel for num_threads(num_threads) schedule(dynamic)
-    for (int i = 0; i < num_threads; ++i) {
+    // Ejecución secuencial de los comandos
+    for (int i = 0; i < num_commands; ++i) {
         try {
             outputs[i] = executeCommand(commands[i]);
         } catch (const std::exception& e) {
@@ -44,11 +43,10 @@ int main() {
         }
     }
 
-    double end_time = omp_get_wtime();
-    std::cout << "Tiempo total de ejecución paralela: " << (end_time - start_time) << " segundos." << std::endl;
+    double end_time = omp_get_wtime(); // Termina de medir el tiempo
 
-    // Imprimir resultados fuera del bloque crítico
-    for (int i = 0; i < num_threads; ++i) {
+    // Imprimir resultados
+    for (int i = 0; i < num_commands; ++i) {
         if (!outputs[i].empty()) {
             std::cout << "Output of command " << i << ": \n" << outputs[i] << std::endl;
         }
@@ -56,6 +54,8 @@ int main() {
             std::cerr << errors[i] << std::endl;
         }
     }
+
+    std::cout << "Tiempo total de ejecución secuencial: " << (end_time - start_time) << " segundos." << std::endl;
 
     return 0;
 }

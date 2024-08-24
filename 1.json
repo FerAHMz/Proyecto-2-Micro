@@ -1,0 +1,11 @@
+{
+    "file_name": "Almond.csv",
+    "model_id": 1,
+    "model_type": "XGBoost",
+    "parameters": {
+      "learning_rate": 0.02,
+      "num_epochs": 100
+    },
+    "description": "Configuración para el modelo 1"
+  }
+

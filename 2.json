@@ -1,0 +1,11 @@
+{
+    "file_name": "Almond.csv",
+    "model_id": 2,
+    "model_type": "LightGBM",
+    "parameters": {
+      "learning_rate": 0.03,
+      "num_epochs": 150
+    },
+    "description": "Configuración para el modelo 2"
+  }
+  

@@ -18,22 +18,59 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 def load_data(filepath):
     data = pd.read_csv(filepath)
-    data.drop(columns=['Unnamed: 0'], inplace=True)
+    data.drop(columns=['Unnamed: 0', 'Header'], inplace=True)
     data.drop_duplicates(inplace=True)
     return data
 
 def preprocess_data(data):
-    columns_with_na = ['Length (major axis)', 'Width (minor axis)', 'Thickness (depth)', 'Roundness', 'Aspect Ratio', 'Eccentricity']
-    imputer = KNNImputer(n_neighbors=5)
-    data[columns_with_na] = imputer.fit_transform(data[columns_with_na])
+    # Codificación de la columna 'Type' antes de cualquier conversión a numérico
     label_encoder = LabelEncoder()
     data['Type'] = label_encoder.fit_transform(data['Type'])
+
+    columns_with_na = ['Length (major axis)', 'Width (minor axis)', 'Thickness (depth)', 'Roundness', 'Aspect Ratio', 'Eccentricity']
+    
+    # Mostrar datos antes de la imputación
+    print("Antes de la imputación:")
+    print(data[columns_with_na].describe(include='all'))
+    
+    # Imputación de valores faltantes
+    imputer = KNNImputer(n_neighbors=5)
+    data[columns_with_na] = imputer.fit_transform(data[columns_with_na])
+    
+    # Mostrar datos después de la imputación
+    print("Después de la imputación:")
+    print(data[columns_with_na].describe(include='all'))
+    
+    # Convertir a numérico todas las columnas excepto 'Type'
+    for col in data.columns:
+        if col != 'Type':
+            data[col] = pd.to_numeric(data[col], errors='coerce')
+    
+    # Mostrar datos después de la conversión a numérico
+    print("Después de la conversión a numérico:")
+    print(data.describe(include='all'))
+    
+    # Eliminar filas con valores NaN que aún queden después de la imputación
+    data = data.dropna()
+    
+    # Verificar el tamaño del DataFrame después de la limpieza
+    print(f"DataFrame size after preprocessing: {data.shape[0]} rows, {data.shape[1]} columns")
+    
+    if data.empty:
+        raise ValueError("DataFrame is empty after preprocessing. Check your data.")
+    
     return data
 
 def train_model(data, model_name):
     X = data.drop('Type', axis=1)
     y = data['Type']
+    
+    # Verificación de los datos antes del entrenamiento
+    print("Verificando que no haya NaN en X antes del entrenamiento:")
+    print(X.isna().sum())
+    
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=101)
+    
     if model_name == 'RandomForest':
         model = RandomForestClassifier(n_estimators=500, n_jobs=-1, random_state=42)
     elif model_name == 'XGBoost':
